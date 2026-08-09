@@ -60,6 +60,29 @@ class OracleClient:
             
             self.conexion.rollback()  # Deshace cambios si hubo un fallo
             return False
+        
+    def insertar_provincias_masivo(self, lista_provincias):
+        query = """
+            INSERT INTO PROVINCE (ID_INE_PROV, ID_COMM, NAM_PROV, DATE_OPRTN_INSERT)
+            VALUES (
+                :id_ine_prov,
+                (SELECT DISTINCT ID_COMM FROM AUT_COMM WHERE ID_AEMET_COMM = :id_comm_aemet),
+                :nombre_provincia,
+                SYSTIMESTAMP
+            )
+        """
+        self.connect()
+        try:
+            with self.conexion.cursor() as cursor:
+                cursor.executemany(query, lista_provincias)
+                self.conexion.commit()
+                print(f"✅ {len(lista_provincias)} registros insertados y confirmados (COMMIT).")
+                return True
+        except oracledb.Error as e:
+            print(f"❌ Error en la inserción masiva: {e}")
+            self.conexion.rollback()
+            return False
+
 
     def close(self):
         """Cierra la conexión de forma segura si está abierta."""

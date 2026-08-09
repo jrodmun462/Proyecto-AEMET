@@ -52,7 +52,7 @@
     "aemet__code": "can"
   },
   {
-    "provincia": "Castelló/Castellón",
+    "provincia": "Castellón/Castelló",
     "aemet__code": "val"
   },
   {
@@ -68,7 +68,7 @@
     "aemet__code": "and"
   },
   {
-    "provincia": "A Coruña",
+    "provincia": "Coruña, A",
     "aemet__code": "gal"
   },
   {
@@ -124,7 +124,7 @@
     "aemet__code": "coo"
   },
   {
-    "provincia": "Isla de Tenerife",
+    "provincia": "Santa Cruz de Tenerife",
     "aemet__code": "coo"
   },
   {
@@ -132,7 +132,7 @@
     "aemet__code": "coo"
   },
   {
-    "provincia": "Isla de La Palma",
+    "provincia": "Palmas, Las",
     "aemet__code": "coo"
   },
   {
@@ -188,7 +188,7 @@
     "aemet__code": "gal"
   },
   {
-    "provincia": "La Rioja",
+    "provincia": "Rioja, La",
     "aemet__code": "rio"
   },
   {

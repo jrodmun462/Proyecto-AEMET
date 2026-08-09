@@ -1,67 +1,82 @@
 # Proyecto AEMET
 
-Proyecto de portfolio que simula una migración de una base de datos on-premise (Oracle) a Azure, utilizando **Azure Data Factory** para orquestar procesos de **ETL/ELT**. Como caso de uso real para poblar el modelo de datos, se integra la **API pública de AEMET OpenData** (predicción meteorológica por municipios).
+Proyecto de portfolio que simula una migración de una base de datos on-premise (Oracle) a Azure, utilizando **Azure Data Factory** para orquestar procesos de **ETL/ELT**. Como caso de uso real para poblar el modelo de datos, se integra la **API pública de AEMET OpenData** y el catálogo de códigos del **INE**.
 
 ## Objetivo del proyecto
 
 Demostrar el ciclo de trabajo de un Data Engineer:
 - Diseño de un modelo de datos relacional en Oracle.
-- Ingesta de datos desde una fuente externa (API REST).
-- Procesos de extracción, transformación y carga.
-- Preparación del terreno para una futura migración a Azure (Data Factory, Synapse/SQL, Data Lake).
+- Ingesta de datos desde fuentes externas (API REST, ficheros oficiales).
+- Procesos de extracción, transformación y carga con control de calidad de datos.
+- Migración de un modelo relacional Oracle → Azure SQL Database orquestada con Azure Data Factory.
 
 ## Arquitectura de datos
 
-El proyecto distingue dos tipos de carga de datos, con un criterio de diseño diferente en cada caso:
+### ETL en Python (Oracle)
 
-### 1. Seed data / Datos de referencia (carga única)
-Comunidades autónomas y provincias son **datos maestros prácticamente inmutables** (equivalentes a una dimensión de tipo 0 en modelado dimensional). Se cargan una única vez desde un fichero JSON estático, sin necesidad de un pipeline recurrente ni de una fuente externa dinámica.
+Todos los pipelines de carga en Oracle siguen el mismo patrón, con las tres fases de un ETL real:
 
-- `Pipelines/ETL_AUT_COMM` → Carga de comunidades autónomas (`AUT_COMM`)
-- `Pipelines/ETL_PROVINCE` → Carga de provincias (`PROVINCE`), relacionadas con `AUT_COMM`
+- **Extract:** lectura desde múltiples fuentes (ficheros oficiales del INE, API/JSON de AEMET).
+- **Transform:** cruce de fuentes por campos comunes, normalización de nombres, resolución de discrepancias entre fuentes (mapeo manual para casos como Baleares/Canarias, donde AEMET modela por islas y el INE por provincia), validación y detección de registros sin coincidencia.
+- **Load:** inserción masiva parametrizada (`executemany`) con bind variables (sin inyección SQL), confirmación interactiva del usuario antes de comprometer cambios (modo dry-run + resumen + S/N), y manejo de errores con rollback.
 
-### 2. ETL real (extracción desde API externa)
-Los municipios se obtienen dinámicamente desde la **API de AEMET OpenData**, que mantiene su propio catálogo (~8.124 municipios) con identificadores propios distintos del estándar INE. Aquí sí se aplican las tres fases de un ETL:
+| Pipeline | Fuentes | Estado |
+|---|---|---|
+| `Pipelines/ETL_AUT_COMM` | JSON AEMET | 🚧 Pdte de modificar |
+| `Pipelines/ETL_PROVINCE` | Excel INE + JSON AEMET | ✅ Completado |
+| `Pipelines/ETL_MUNICIPALITIES` | API REST AEMET (en vivo) | 🚧 En progreso |
+| `Pipelines/ETL_METEOR_CENTER` | API REST AEMET (en vivo) | ⬜ Pdte |
 
-- **Extract:** llamada a la API REST de AEMET.
-- **Transform:** normalización de texto, mapeo de provincia → `ID_PROV`, validación de datos.
-- **Load:** inserción idempotente en `MUNICIPALITY`.
+### Migración a Azure (Azure Data Factory)
 
-- `Pipelines/ETL_MUNICIPALITIES` → Carga de municipios (`MUNICIPIOS`) desde la API de AEMET
+En paralelo al ETL en Oracle, se ha montado la infraestructura de migración a la nube:
+
+- **Self-Hosted Integration Runtime** conectando el Oracle local con Azure Data Factory.
+- **Linked Services** hacia Oracle (origen) y Azure SQL Database (destino).
+- **Datasets** y **Pipeline** con actividades Copy Data para `AUT_COMM` y `PROVINCE`, encadenadas respetando la integridad referencial (FK).
+- Esquema de tablas replicado en Azure SQL (T-SQL), incluyendo la traducción de tipos de datos entre motores (Oracle `TIMESTAMP` → SQL Server `DATETIME2`, secuencias → `IDENTITY`, etc.).
+- **Control de versiones nativo de ADF** conectado a este mismo repositorio de GitHub (carpeta `/Azure Data Factory`), de modo que cada cambio en los pipelines, datasets y linked services queda versionado como código.
 
 ## Modelo de datos
 
-Tablas principales en Oracle (`Model and Tables Oracle/Oracle Tables`):
+Tablas principales en Oracle (`Model and Tables Oracle/Oracle Tables`), replicadas en Azure SQL (`Model and Tables Oracle/Azure SQL Tables`):
 
 | Tabla | Descripción |
 |---|---|
-| `Comunidad_Autonoma` | Comunidades autónomas de España |
-| `Provincia` | Provincias, relacionadas con su comunidad autónoma |
-| `Municipios` | Municipios según catálogo de AEMET, relacionados con su provincia |
-| `Centro_meteorologico` | Estaciones/centros meteorológicos |
-| `Estado_Centro_meteorologico` | Estado operativo de los centros meteorológicos |
-| `Reporte_del_tiempo` | Datos de predicción/observación obtenidos de la API |
+| `AUT_COMM` | Comunidades autónomas de España |
+| `PROVINCE` | Provincias, relacionadas con su comunidad autónoma |
+| `MUNICIPIO` | Municipios según catálogo de AEMET, relacionados con su provincia |
+| `METEOR_CENTER` | Estaciones/centros meteorológicos |
+| `TIME_REPORT` | Datos de predicción/observación obtenidos de la API |
 
 *(Diagrama entidad-relación disponible en `Model and Tables Oracle/Data Model`)*
 
 ## Tecnologías utilizadas
 
-- **Python** (extracción, transformación y carga de datos)
-- **Oracle Database** (almacenamiento origen)
-- **AEMET OpenData API** (fuente de datos externa)
-- **Azure Data Factory** *(próxima fase: orquestación de la migración a Azure)*
+- **Python** (`requests`, `pandas`, `oracledb`) — extracción, transformación y carga de datos
+- **Oracle Database** — almacenamiento origen
+- **Azure SQL Database** — almacenamiento destino
+- **Azure Data Factory** — orquestación de la migración (Self-Hosted IR, Linked Services, Pipelines)
+- **AEMET OpenData API** e **INE** — fuentes de datos externas
+- **Git / GitHub** — control de versiones, incluyendo integración nativa con ADF
 
 ## Estado del proyecto
 
-- [x] Modelo de datos en Oracle
-- [x] Carga de datos de referencia (CCAA, provincias)
+- [x] Modelo de datos en Oracle y Azure SQL
+- [x] ETL de comunidades autónomas y provincias (doble fuente, INE + AEMET)
+- [x] Infraestructura de migración a Azure (Integration Runtime, Linked Services, Datasets)
+- [x] Pipeline de ADF: Oracle → Azure SQL para `AUT_COMM` y `PROVINCE`
+- [x] Control de versiones de ADF conectado a GitHub
 - [ ] ETL de municipios desde API de AEMET
-- [ ] ETL de Centros meteorologicos desde API de AEMET
+- [ ] ETL de centros meteorológicos desde API de AEMET
 - [ ] Ingesta de datos de predicción/observación meteorológica
-- [ ] Migración a Azure con Data Factory
+- [ ] Extender el pipeline de ADF a las tablas restantes
+- [ ] Automatizar despliegue de ADF con GitHub Actions (CI/CD)
 
 ## Próximos pasos
 
-1. Completar el ETL de municipios.
-2. Diseñar el pipeline de ingesta de predicciones meteorológicas (datos que sí cambian frecuentemente → ETL incremental).
-3. Trasladar la orquestación a Azure Data Factory.
+1. Completar el ETL de municipios contra la API en vivo de AEMET.
+2. Completar el ETL de centros meteorológicos.
+3. Diseñar el pipeline de ingesta de predicciones meteorológicas (datos que cambian frecuentemente → ETL incremental).
+4. Extender el pipeline de Azure Data Factory al resto de tablas del modelo.
+5. Automatizar el despliegue de ADF con GitHub Actions.

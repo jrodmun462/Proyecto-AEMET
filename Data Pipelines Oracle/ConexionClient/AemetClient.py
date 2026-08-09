@@ -2,6 +2,7 @@ import requests
 import json
 import os
 from dotenv import load_dotenv
+import pandas as pd
 
 load_dotenv()
 class AemetClient:
@@ -41,18 +42,12 @@ class AemetClient:
         except requests.exceptions.RequestException as e:
             print(f"Error de conexión HTTP: {e}")
             return None
+        
+    def getDataFrame(self, url_endpoint):
+        """Realiza la petición y devuelve directamente un DataFrame de pandas."""
+        datos = self._realizar_peticion(url_endpoint)
 
-    def obtener_prediccion_municipio(self, codigo_municipio):
-        """Obtiene la predicción diaria para un municipio específico."""
-        url = f"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/{codigo_municipio}"
-        return self._realizar_peticion(url)
+        if datos is None:
+            return pd.DataFrame()  # DataFrame vacío si algo falló
 
-    def obtener_prediccion_ccaa(self, codigo_ccaa, momento="hoy"):
-        """Obtiene la predicción de una CCAA ('hoy', 'manana' o 'pasadomanana')."""
-        url = f"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/{momento}/{codigo_ccaa}"
-        return self._realizar_peticion(url)
-
-    def obtener_maestro_municipios(self):
-        """Devuelve el listado completo de todos los municipios de España y sus IDs."""
-        url = f"https://opendata.aemet.es"
-        return self._realizar_peticion(url)
+        return pd.DataFrame(datos)
