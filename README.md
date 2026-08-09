@@ -60,6 +60,11 @@ Tablas principales en Oracle (`Model and Tables Oracle/Oracle Tables`), replicad
 - **AEMET OpenData API** e **INE** — fuentes de datos externas
 - **Git / GitHub** — control de versiones, incluyendo integración nativa con ADF
 
+## Nota sobre el uso de IA
+Este proyecto se ha desarrollado con el apoyo de Claude (Anthropic) como asistente
+de programación y aprendizaje —para depurar errores, discutir decisiones de diseño
+y acelerar la escritura de código—, bajo dirección y revisión propias en cada paso
+
 ## Estado del proyecto
 
 - [x] Modelo de datos en Oracle y Azure SQL
