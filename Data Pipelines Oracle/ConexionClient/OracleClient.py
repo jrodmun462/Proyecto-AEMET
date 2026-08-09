@@ -83,6 +83,27 @@ class OracleClient:
             self.conexion.rollback()
             return False
 
+    def insertar_comunidades_masivo(self, lista_provincias):
+        query = """
+            INSERT INTO AUT_COMM (ID_AEMET_COMM, NAM_COMM,  DATE_OPRTN_INSERT)
+            VALUES (
+                :id_aemet_com,
+                :nam_comm,
+                SYSTIMESTAMP
+            )
+        """
+        self.connect()
+        try:
+            with self.conexion.cursor() as cursor:
+                cursor.executemany(query, lista_provincias)
+                self.conexion.commit()
+                print(f"✅ {len(lista_provincias)} registros insertados y confirmados (COMMIT).")
+                return True
+        except oracledb.Error as e:
+            print(f"❌ Error en la inserción masiva: {e}")
+            self.conexion.rollback()
+            return False
+
 
     def close(self):
         """Cierra la conexión de forma segura si está abierta."""

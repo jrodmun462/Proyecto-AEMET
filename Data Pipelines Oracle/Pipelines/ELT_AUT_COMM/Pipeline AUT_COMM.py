@@ -1,6 +1,7 @@
+from pathlib import Path
 import sys
 import os
-import json
+import pandas as pd
 
 # 1. Subimos dos niveles de forma limpia en el árbol de carpetas
 ruta_script = os.path.dirname(__file__)                  # Pipeline PROVINCE
@@ -17,19 +18,57 @@ if ruta_conexion not in sys.path:
 # 4. Importamos el cliente
 from OracleClient import OracleClient
 
-ruta=os.path.dirname(__file__)
-ruta_json = os.path.join(ruta, "Comunidad autonoma.json")
+def localizarArchivoComunidadAutonoma():
+    # Obtiene la carpeta exacta donde está este script actual
+    script_dir = Path(__file__).resolve().parent
+    
+    # Sube 3 niveles hacia atrás para llegar a la raíz (PROYECTO-AEMET)
+    # script_dir es 'ELT_PROVINCE' -> .parent es 'Pipelines' -> .parent.parent es 'Data Pipelines Oracle' -> .parent.parent.parent es la raíz
+    raiz_proyecto = script_dir.parent.parent.parent
+    
+    # Construye la ruta apuntando a la nueva carpeta centralizada
+    ruta_json = raiz_proyecto / "Archivos de Extracción" / "Comunidad autonoma.json"
 
-db = OracleClient()
-with open(ruta_json, "r", encoding="utf-8") as archivo:
-    datosProvincia = json.load(archivo)
-# Preparamos los datos
-print("ETL basica para la inserción de datos en AUT_COMM en Oracle")
+    return ruta_json
 
-for elemento in datosProvincia:
-    # Encadenamos los reemplazos sobre la plantilla base
-    insert = "INSERT INTO AUT_COMM (ID_AEMET_COMM,NAM_COMM) VALUES(:1,:2) " \
-             .replace(":1", "'" + elemento["id_aemet_comm"] + "'") \
-             .replace(":2", "'" + elemento["nam_comm"] + "'")
-    db.execute(insert)
-db.close()
+def extraerComunidades():
+    # Extraer dato
+    dir = localizarArchivoComunidadAutonoma()
+    df = pd.read_json(dir)
+    return df
+
+def confirmacion(listaParaInsertar):
+    db = OracleClient()
+    # --- Resumen, siempre se muestra, haya o no fallos ---
+    print(f"\n{len(listaParaInsertar)} registros listos para insertar.")
+
+    # --- Confirmación, siempre se pregunta ---
+    respuesta = input("¿Quiere realizar commit? S/N: ").upper()
+
+    while respuesta != "S" and respuesta != "N":
+        print("Opción no válida. Por favor, introduzca S o N.")
+        respuesta = input("¿Quiere realizar commit? S/N: ").upper()
+
+    if respuesta == "S":
+        db.insertar_comunidades_masivo(listaParaInsertar)
+    else:
+        print("Volcado cancelado por el usuario")
+
+    db.close()
+
+def pipeline():
+    
+    lista = extraerComunidades()
+    listaParaInsertar = []  # <-- aquí guardamos los registros válidos
+
+    for indice, fila in lista.iterrows():
+        codigo = fila["id_aemet_comm"]
+        nombre = fila["nam_comm"]
+
+        # En vez de imprimir el string, guardamos los datos para el insert masivo
+        listaParaInsertar.append({
+            "id_aemet_com": codigo,
+            "nam_comm": nombre,
+        })
+    confirmacion(listaParaInsertar)
+pipeline()

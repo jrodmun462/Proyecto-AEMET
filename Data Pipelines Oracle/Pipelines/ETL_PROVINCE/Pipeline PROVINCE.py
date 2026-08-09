@@ -10,15 +10,12 @@ ruta_raiz_oracle = os.path.dirname(ruta_pipelines)       # Data Pipelines Oracle
 
 # Construimos la ruta hacia los clientes de conexión
 ruta_conexionOracle = os.path.join(ruta_raiz_oracle, "ConexionClient")
-ruta_conexionAemet = os.path.join(ruta_raiz_oracle, "AemetClient")
 # Añadimos la ruta al path de Python si no está ya
 if ruta_conexionOracle not in sys.path:
     sys.path.append(ruta_conexionOracle)
-    sys.path.append(ruta_conexionAemet)
 
 # Ahora sí, importamos el cliente sin errores
 from OracleClient import OracleClient
-from AemetClient import AemetClient
 
 def localizarArchivoCodIne():
     # Obtiene la carpeta exacta donde está este script actual
@@ -75,9 +72,7 @@ def confirmacion(listaFallos,listaParaInsertar):
         respuesta = input("¿Quiere realizar commit? S/N: ").upper()
 
     if respuesta == "S":
-        db.connect()
         db.insertar_provincias_masivo(listaParaInsertar)
-        print("Commit realizado con éxito.")
     else:
         print("Volcado cancelado por el usuario")
 
