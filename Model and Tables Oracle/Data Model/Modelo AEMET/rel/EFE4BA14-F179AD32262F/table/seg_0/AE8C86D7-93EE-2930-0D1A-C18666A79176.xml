@@ -16,8 +16,6 @@
 <use>1</use>
 <logicalDatatype>LOGDT026</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
-<autoIncrementColumn>true</autoIncrementColumn>
-<identityColumn>true</identityColumn>
 <autoIncrementMinValue>1</autoIncrementMinValue>
 <autoIncrementMaxValue>50</autoIncrementMaxValue>
 <autoIncrementCycle>false</autoIncrementCycle>

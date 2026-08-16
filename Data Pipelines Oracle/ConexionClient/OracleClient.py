@@ -2,6 +2,7 @@ import oracledb
 import sys
 import os
 from dotenv import load_dotenv
+oracledb.init_oracle_client(lib_dir=r"C:\instantclient_ 23_26\instantclient_23_26")
 
 load_dotenv()  
 class OracleClient:
@@ -63,7 +64,7 @@ class OracleClient:
         
     def insertar_provincias_masivo(self, lista_provincias):
         query = """
-            INSERT INTO PROVINCE (ID_INE_PROV, ID_COMM, NAM_PROV, DATE_OPRTN_INSERT)
+            INSERT INTO PROVINCE (ID_PROV, ID_COMM, NAM_PROV, DATE_OPRTN_INSERT)
             VALUES (
                 :id_ine_prov,
                 (SELECT DISTINCT ID_COMM FROM AUT_COMM WHERE ID_AEMET_COMM = :id_comm_aemet),
