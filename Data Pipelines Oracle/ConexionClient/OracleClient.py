@@ -124,14 +124,28 @@ class OracleClient:
     def insertar_municipios_masivo(self, lista_municipios):
         """Carga masiva de municipios en la tabla MUNICIPALITIES."""
         query = """
-            INSERT INTO MUNICIPALITIES (ID_MUN, ID_MUN_AEMET, ID_PROV, NAM_MUN) VALUES (:id_mun, :id_mun_aemet, :id_prov, :nam_mun)
+            MERGE INTO MUNICIPALITIES M
+                USING (SELECT :id_mun AS id_mun, :id_mun_aemet AS id_mun_aemet, :id_prov AS id_prov, :nam_mun AS nombre FROM DUAL) D
+                ON (M.ID_MUN_AEMET = D.id_mun_aemet AND M.ID_PROV = D.id_prov)
+            WHEN NOT MATCHED THEN
+                INSERT (ID_MUN, ID_MUN_AEMET, ID_PROV, NAM_MUN) VALUES (D.id_mun, D.id_mun_aemet, D.id_prov, D.nombre)
         """
+        query2= "SELECT COUNT(*) FROM MUNICIPALITIES"
         self.connect()
         try:
+            vacio = True
             with self.conexion.cursor() as cursor:
+                #Comprobamos si ya hay registros en la tabla MUNICIPALITIES
+                cursor.execute(query2)
+                total_registros = cursor.fetchone()[0]
+                if total_registros > 0:
+                    print(f"⚠️ Aviso: La tabla no esta vacia. Hay Registros que no han sido insertados para evitar duplicados.")
+                    vacio = False
+
                 cursor.executemany(query, lista_municipios)
                 self.conexion.commit()
-                print(f"✅ {len(lista_municipios)} registros insertados y confirmados (COMMIT).")
+                if vacio == True:
+                    print(f"✅ Registros insertados y confirmados (COMMIT).")
                 return True
         except oracledb.Error as e:
             print(f"❌ Error en la inserción masiva: {e}")
