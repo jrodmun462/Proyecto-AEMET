@@ -63,6 +63,7 @@ class OracleClient:
             return False
         
     def insertar_provincias_masivo(self, lista_provincias):
+        """Carga masiva de provincias en la tabla PROVINCE."""
         query = """
             INSERT INTO PROVINCE (ID_PROV, ID_COMM, NAM_PROV, DATE_OPRTN_INSERT)
             VALUES (
@@ -84,7 +85,9 @@ class OracleClient:
             self.conexion.rollback()
             return False
 
-    def insertar_comunidades_masivo(self, lista_provincias):
+    def insertar_comunidades_masivo(self, lista_comunidades):
+        """Carga masiva de comunidades autónomas en la tabla AUT_COMM."""
+
         query = """
             INSERT INTO AUT_COMM (ID_AEMET_COMM, NAM_COMM,  DATE_OPRTN_INSERT)
             VALUES (
@@ -96,15 +99,44 @@ class OracleClient:
         self.connect()
         try:
             with self.conexion.cursor() as cursor:
-                cursor.executemany(query, lista_provincias)
+                cursor.executemany(query, lista_comunidades)
                 self.conexion.commit()
-                print(f"✅ {len(lista_provincias)} registros insertados y confirmados (COMMIT).")
+                print(f"✅ {len(lista_comunidades)} registros insertados y confirmados (COMMIT).")
                 return True
         except oracledb.Error as e:
             print(f"❌ Error en la inserción masiva: {e}")
             self.conexion.rollback()
             return False
 
+    def comprobar_provincia_existente(self, idProv):
+        """Comprueba si hay algun municipio que tenga una provincia que no tenga código."""
+        query = "SELECT COUNT(*) FROM PROVINCE WHERE ID_PROV= :idProv"
+        self.connect()
+        try:
+            with self.conexion.cursor() as cursor:
+                cursor.execute(query, {"idProv": idProv})
+                count = cursor.fetchone()[0]
+                return count
+        except oracledb.Error as e:
+            print(f"❌ Error al comprobar provincia existente: {e}")
+            return False
+
+    def insertar_municipios_masivo(self, lista_municipios):
+        """Carga masiva de municipios en la tabla MUNICIPALITIES."""
+        query = """
+            INSERT INTO MUNICIPALITIES (ID_MUN, ID_MUN_AEMET, ID_PROV, NAM_MUN) VALUES (:id_mun, :id_mun_aemet, :id_prov, :nam_mun)
+        """
+        self.connect()
+        try:
+            with self.conexion.cursor() as cursor:
+                cursor.executemany(query, lista_municipios)
+                self.conexion.commit()
+                print(f"✅ {len(lista_municipios)} registros insertados y confirmados (COMMIT).")
+                return True
+        except oracledb.Error as e:
+            print(f"❌ Error en la inserción masiva: {e}")
+            self.conexion.rollback()
+            return False
 
     def close(self):
         """Cierra la conexión de forma segura si está abierta."""

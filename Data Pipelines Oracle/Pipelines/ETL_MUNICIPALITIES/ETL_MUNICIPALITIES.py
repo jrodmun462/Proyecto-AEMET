@@ -1,7 +1,5 @@
 import sys
 import os
-import json
-import pandas as pd
 
 # 1. Subimos dos niveles de forma limpia en el árbol de carpetas
 ruta_script = os.path.dirname(__file__)                  # Pipeline MUNICIPALITIES
@@ -22,18 +20,71 @@ from AemetClient import AemetClient
 
 
 # Preparamos los datos
-print("ELT para la inserción de datos en PROVINCE en Oracle")
 BASE_URL = "https://opendata.aemet.es/opendata/api/maestro/municipios/"
-BASE_URL2 = "https://opendata.aemet.es/opendata/api/valores/climatologicos/inventarioestaciones/todasestaciones"
+
+def revisarListaDeFallos(listaFallos):
+    if len(listaFallos) != 0:
+        print(f"Se han detectado {len(listaFallos)} municipios que no se insertarian en caso de commit:")
+        respuesta = input("¿Quiere verlos? S/N: ").upper()
+
+        while respuesta != "S" and respuesta != "N":
+            print("Opción no válida. Por favor, introduzca S o N.")
+            respuesta = input("¿Quiere realizar commit? S/N: ").upper()
+
+        if respuesta == "S":
+            print("\n".join(listaFallos))
+            print()
+
+def confirmacion(listaFallos,listaParaInsertar,cantidadRegistrosValidos):
+    db = OracleClient()
+    # --- Resumen, siempre se muestra, haya o no fallos ---
+    print(f"\n{cantidadRegistrosValidos} registros listos para insertar.")
+
+    revisarListaDeFallos(listaFallos)
+
+    # --- Confirmación, siempre se pregunta ---
+    respuesta = input("¿Quiere realizar commit? S/N: ").upper()
+
+    while respuesta != "S" and respuesta != "N":
+        print("Opción no válida. Por favor, introduzca S o N.")
+        respuesta = input("¿Quiere realizar commit? S/N: ").upper()
+
+    if respuesta == "S":
+        db.insertar_municipios_masivo(listaParaInsertar)
+    else:
+        print("Volcado cancelado por el usuario")
+
+    db.close()
+
 def extraerMunicipiosAemet():
     ac = AemetClient()
     db = OracleClient()
+    listaParaInsertar = []  # <-- aquí guardamos los registros válidos
+    listaFallos = []
+    x = 0
     # Extraer dato
-    info1=ac.getDataFrame(BASE_URL)
-    info2=ac.getDataFrame(BASE_URL2)
-    info3= ac._realizar_peticion(BASE_URL)
+    lista=ac.getDataFrame(BASE_URL)
 
-    print("DataFrame1:\n", info1.head(100),"\n")
-    print("DataFrame2:\n", info2.head(100))
+    for indice, fila in lista.iterrows():
 
+        #Sacamos los datos del dataframe
+        codMunicipioDF = str(fila["id"])
+        nombreMunicipio = str(fila["nombre"])
+
+        #Sacamos el código de la provincia a partir del código del municipio
+        codProvincia = codMunicipioDF[2:4]
+        codMunicipio = codMunicipioDF[4:7]
+
+        if db.comprobar_provincia_existente(codProvincia)==0:
+            listaFallos.append(f"⚠️ El municipio {nombreMunicipio} con código {codMunicipioDF} no se ha insertado porque la provincia con código {codProvincia} no existe en la base de datos.")
+            
+        else:
+            x += 1
+            listaParaInsertar.append({
+                "id_mun": None,  # Se deja como None para que el trigger genere el ID automáticamente
+                "id_mun_aemet": codMunicipio,
+                "id_prov": codProvincia,
+                "nam_mun": nombreMunicipio
+            })
+    confirmacion(listaFallos,listaParaInsertar,x)
 extraerMunicipiosAemet()

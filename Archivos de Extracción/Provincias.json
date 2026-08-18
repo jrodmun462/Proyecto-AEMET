@@ -100,43 +100,15 @@
     "aemet__code": "arn"
   },
   {
-    "provincia": "Isla de Menorca",
+    "provincia": "Balears, Illes",
     "aemet__code": "bal"
-  },
-  {
-    "provincia": "Isla de Mallorca",
-    "aemet__code": "bal"
-  },
-  {
-    "provincia": "Islas de Ibiza y Formentera",
-    "aemet__code": "bal"
-  },
-  {
-    "provincia": "Isla de Lanzarote",
-    "aemet__code": "coo"
-  },
-  {
-    "provincia": "Isla de Fuerteventura",
-    "aemet__code": "coo"
-  },
-  {
-    "provincia": "Isla de Gran Canaria",
-    "aemet__code": "coo"
   },
   {
     "provincia": "Santa Cruz de Tenerife",
     "aemet__code": "coo"
   },
   {
-    "provincia": "Isla de La Gomera",
-    "aemet__code": "coo"
-  },
-  {
     "provincia": "Palmas, Las",
-    "aemet__code": "coo"
-  },
-  {
-    "provincia": "Isla de El Hierro",
     "aemet__code": "coo"
   },
   {

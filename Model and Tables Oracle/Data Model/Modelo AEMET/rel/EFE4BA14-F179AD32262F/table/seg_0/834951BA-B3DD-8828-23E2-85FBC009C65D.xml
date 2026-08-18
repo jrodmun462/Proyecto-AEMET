@@ -34,9 +34,6 @@
 <ownDataTypeParameters>,,</ownDataTypeParameters>
 <previousColumn>false</previousColumn>
 <autoIncrementCycle>false</autoIncrementCycle>
-<associations>
-<colAssociation fkAssociation="FFFE6D6C-C532-80C1-A5C4-82E77658A3AD" referredColumn="696D75F3-D8F0-9532-7737-B95C591B7DBA"/>
-</associations>
 </Column>
 <Column name="DATE_START" id="212BBA64-1EA2-6C99-FB3F-4532B1EA0C40">
 <createdBy>Usuario</createdBy>
@@ -77,7 +74,7 @@
 <use>1</use>
 <logicalDatatype>LOGDT024</logicalDatatype>
 <dataTypeSize>2</dataTypeSize>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
+<ownDataTypeParameters>2,,</ownDataTypeParameters>
 <previousColumn>false</previousColumn>
 <autoIncrementCycle>false</autoIncrementCycle>
 <associations>
@@ -131,6 +128,20 @@
 <colAssociation fkAssociation="E3CEE977-0328-2E75-AF5C-524159334EA9" referredColumn="51F6867B-A9AF-CA94-86A6-5E39F7D3F810"/>
 </associations>
 </Column>
+<Column name="MUNICIPALITIES_ID_MUN_AEMET" id="A4F1828F-D6A2-1F66-A89D-F6CAF09B70EE">
+<createdBy>jonij</createdBy>
+<createdTime>2026-08-18 17:38:36 UTC</createdTime>
+<ownerDesignName>Modelo AEMET</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT026</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="FFFE6D6C-C532-80C1-A5C4-82E77658A3AD" referredColumn="696D75F3-D8F0-9532-7737-B95C591B7DBA"/>
+</associations>
+</Column>
 </columns>
 <indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
 <ind_PK_UK id="C989C368-687B-BEC8-DCDE-29B0B262E417" name="METEOR_CENTER_PK">
@@ -173,7 +184,7 @@
 <indexState>Foreign Key</indexState>
 <isSurrogateKey>false</isSurrogateKey>
 <indexColumnUsage>
-<colUsage columnID="C1CD05C9-0899-DB7C-DD7A-3C2A704A96C0"/>
+<colUsage columnID="A4F1828F-D6A2-1F66-A89D-F6CAF09B70EE"/>
 </indexColumnUsage>
 </ind_PK_UK>
 <ind_PK_UK id="A30D301F-46DB-8103-E442-00342C8491DB" name="METEOR_CENTER_DATE_OPRTN_INSERT_FK">

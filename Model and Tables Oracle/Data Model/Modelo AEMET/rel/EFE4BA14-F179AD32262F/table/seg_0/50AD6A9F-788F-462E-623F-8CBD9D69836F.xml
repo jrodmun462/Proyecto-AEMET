@@ -8,7 +8,22 @@
 <existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
 <parsed>true</parsed>
 <columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
-<Column name="ID_MUN" id="696D75F3-D8F0-9532-7737-B95C591B7DBA">
+<Column name="ID_MUN" id="EC116198-51EB-7C97-4E5B-9BCB4EF8AAB6">
+<createdBy>jonij</createdBy>
+<createdTime>2026-08-18 17:12:07 UTC</createdTime>
+<ownerDesignName>Modelo AEMET</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementColumn>true</autoIncrementColumn>
+<autoIncrementMinValue>1</autoIncrementMinValue>
+<autoIncrementMaxValue>9999</autoIncrementMaxValue>
+<autoIncrementCycle>false</autoIncrementCycle>
+<autoIncrementSequenceName>SECID_MUN</autoIncrementSequenceName>
+<autoIncrementTriggerName>TRIG_ID_MUN</autoIncrementTriggerName>
+</Column>
+<Column name="ID_MUN_AEMET" id="696D75F3-D8F0-9532-7737-B95C591B7DBA">
 <createdBy>Usuario</createdBy>
 <createdTime>2026-07-31 17:27:14 UTC</createdTime>
 <ownerDesignName>Modelo AEMET</ownerDesignName>
@@ -16,8 +31,6 @@
 <use>1</use>
 <logicalDatatype>LOGDT026</logicalDatatype>
 <ownDataTypeParameters>,,</ownDataTypeParameters>
-<autoIncrementColumn>true</autoIncrementColumn>
-<identityColumn>true</identityColumn>
 <autoIncrementMinValue>1</autoIncrementMinValue>
 <autoIncrementMaxValue>8132</autoIncrementMaxValue>
 <autoIncrementCycle>false</autoIncrementCycle>
@@ -84,7 +97,7 @@
 <indexState>Unique Plain Index</indexState>
 <isSurrogateKey>false</isSurrogateKey>
 <indexColumnUsage>
-<colUsage columnID="696D75F3-D8F0-9532-7737-B95C591B7DBA"/>
+<colUsage columnID="EC116198-51EB-7C97-4E5B-9BCB4EF8AAB6"/>
 </indexColumnUsage>
 </ind_PK_UK>
 <ind_PK_UK id="81BACCE7-4813-47B4-FB50-B884DFEC8345" name="MUNICIPALITIES_FK1">
