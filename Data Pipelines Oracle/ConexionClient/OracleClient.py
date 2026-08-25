@@ -121,10 +121,54 @@ class OracleClient:
             print(f"❌ Error al comprobar provincia existente: {e}")
             return False
 
+    def comprobar_provincia_centro(self, idProv):
+        """Comprueba si el id de la provincia sacada de centro meteorologico existe en base de datos."""
+        query = "SELECT COUNT(*) FROM PROVINCE WHERE ID_PROV= :idProv"
+        self.connect()
+        try:
+            with self.conexion.cursor() as cursor:
+                cursor.execute(query, {"idProv": idProv})
+                count = cursor.fetchone()[0]
+                return count
+        except oracledb.Error as e:
+            print(f"❌ Error al comprobar provincia existente: {e}")
+            return False
+
     def insertar_municipios_masivo(self, lista_municipios):
         """Carga masiva de municipios en la tabla MUNICIPALITIES."""
         query = """
             MERGE INTO MUNICIPALITIES M
+                USING (SELECT :id_mun AS id_mun, :id_mun_aemet AS id_mun_aemet, :id_prov AS id_prov, :nam_mun AS nombre FROM DUAL) D
+                ON (M.ID_MUN_AEMET = D.id_mun_aemet AND M.ID_PROV = D.id_prov)
+            WHEN NOT MATCHED THEN
+                INSERT (ID_MUN, ID_MUN_AEMET, ID_PROV, NAM_MUN) VALUES (D.id_mun, D.id_mun_aemet, D.id_prov, D.nombre)
+        """
+        query2= "SELECT COUNT(*) FROM MUNICIPALITIES"
+        self.connect()
+        try:
+            vacio = True
+            with self.conexion.cursor() as cursor:
+                #Comprobamos si ya hay registros en la tabla MUNICIPALITIES
+                cursor.execute(query2)
+                total_registros = cursor.fetchone()[0]
+                if total_registros > 0:
+                    print(f"⚠️ Aviso: La tabla no esta vacia. Hay Registros que no han sido insertados para evitar duplicados.")
+                    vacio = False
+
+                cursor.executemany(query, lista_municipios)
+                self.conexion.commit()
+                if vacio == True:
+                    print(f"✅ Registros insertados y confirmados (COMMIT).")
+                return True
+        except oracledb.Error as e:
+            print(f"❌ Error en la inserción masiva: {e}")
+            self.conexion.rollback()
+            return False
+
+    def insertar_centros_masivo(self, lista_centros):
+        """Carga masiva de centros en la tabla CENTROS."""
+        query = """
+            MERGE INTO METEOR_CENTER M
                 USING (SELECT :id_mun AS id_mun, :id_mun_aemet AS id_mun_aemet, :id_prov AS id_prov, :nam_mun AS nombre FROM DUAL) D
                 ON (M.ID_MUN_AEMET = D.id_mun_aemet AND M.ID_PROV = D.id_prov)
             WHEN NOT MATCHED THEN
