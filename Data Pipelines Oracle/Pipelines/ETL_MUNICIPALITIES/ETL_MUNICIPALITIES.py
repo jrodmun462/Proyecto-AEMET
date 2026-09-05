@@ -56,6 +56,16 @@ def confirmacion(listaFallos,listaParaInsertar,cantidadRegistrosValidos):
 
     db.close()
 
+def formatearNombreMunicipio(nombre):
+    # Creamos una tabla de traducción mapeando cada tilde con su letra limpia
+    tabla_tildes = str.maketrans({
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+        "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U"
+    })
+    
+    # Aplicamos la traducción al texto recibido
+    return nombre.translate(tabla_tildes)
+
 def extraerMunicipiosAemet():
     ac = AemetClient()
     db = OracleClient()
@@ -65,26 +75,34 @@ def extraerMunicipiosAemet():
     # Extraer dato
     lista=ac.getDataFrame(BASE_URL)
 
-    for indice, fila in lista.iterrows():
+    db.connect() 
+    try:
+        with db.conexion.cursor() as cursor:
+            for fila in lista.itertuples():
 
-        #Sacamos los datos del dataframe
-        codMunicipioDF = str(fila["id"])
-        nombreMunicipio = str(fila["nombre"])
+                codMunicipioDF = str(fila.id)
+                nombreMunicipio = formatearNombreMunicipio(str(fila.nombre))
+        
+                #Sacamos el código de la provincia a partir del código del municipio
+                codProvincia = codMunicipioDF[2:4]
+                codMunicipio = codMunicipioDF[4:7]
+                comprobar = db.comprobar_provincia_existente(codProvincia,cursor)
+                if comprobar == 0:
+                    listaFallos.append(f"⚠️ El municipio {nombreMunicipio} con código {codMunicipioDF} no se ha insertado porque la provincia con código {codProvincia} no existe en la base de datos.")
+                    
+                else:
+                    x += 1
+                    listaParaInsertar.append({
+                        "id_mun": None,  # Se deja como None para que el trigger genere el ID automáticamente
+                        "id_mun_aemet": codMunicipio,
+                        "id_prov": codProvincia,
+                        "nam_mun": nombreMunicipio
+                    })
+        confirmacion(listaFallos,listaParaInsertar,x)
 
-        #Sacamos el código de la provincia a partir del código del municipio
-        codProvincia = codMunicipioDF[2:4]
-        codMunicipio = codMunicipioDF[4:7]
+    except Exception as e:
+        print(f"❌ Error inesperado: {e}")
+    finally:
+        db.close()
 
-        if db.comprobar_provincia_existente(codProvincia)==0:
-            listaFallos.append(f"⚠️ El municipio {nombreMunicipio} con código {codMunicipioDF} no se ha insertado porque la provincia con código {codProvincia} no existe en la base de datos.")
-            
-        else:
-            x += 1
-            listaParaInsertar.append({
-                "id_mun": None,  # Se deja como None para que el trigger genere el ID automáticamente
-                "id_mun_aemet": codMunicipio,
-                "id_prov": codProvincia,
-                "nam_mun": nombreMunicipio
-            })
-    confirmacion(listaFallos,listaParaInsertar,x)
 extraerMunicipiosAemet()

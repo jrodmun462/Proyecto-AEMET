@@ -55,6 +55,16 @@ def extraerProvincias():
     df = pd.read_json(dir)
     return df
 
+def formatearNombreMunicipio(nombre):
+    # Creamos una tabla de traducción mapeando cada tilde con su letra limpia
+    tabla_tildes = str.maketrans({
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+        "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U"
+    })
+    
+    # Aplicamos la traducción al texto recibido
+    return nombre.translate(tabla_tildes)
+
 def confirmacion(listaFallos,listaParaInsertar):
     db = OracleClient()
     # --- Resumen, siempre se muestra, haya o no fallos ---
@@ -106,7 +116,7 @@ def pipeline():
         listaParaInsertar.append({
             "id_ine_prov": int(codigo),
             "id_comm_aemet": codProvince,
-            "nombre_provincia": nombre
+            "nombre_provincia": formatearNombreMunicipio(nombre)
         })
     confirmacion(listaFallos,listaParaInsertar)
   

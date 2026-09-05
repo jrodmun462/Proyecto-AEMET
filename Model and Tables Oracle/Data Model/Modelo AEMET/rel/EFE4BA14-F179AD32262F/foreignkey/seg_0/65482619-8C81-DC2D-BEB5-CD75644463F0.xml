@@ -1,0 +1,16 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="65482619-8C81-DC2D-BEB5-CD75644463F0" containerWithKeyObject="834951BA-B3DD-8828-23E2-85FBC009C65D" localFKIndex="FC074356-FB43-072A-1E67-E0A10B3C6ADF" name="METEOR_CENTER_FK2">
+<createdBy>jonij</createdBy>
+<createdTime>2026-08-25 16:49:56 UTC</createdTime>
+<ownerDesignName>Modelo AEMET</ownerDesignName>
+<referredTableLongName>PROVINCE</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>AE8C86D7-93EE-2930-0D1A-C18666A79176</referredTableID>
+<keyObject>85DDB95F-3992-6F7E-4F70-6EA7515B8257</keyObject>
+<referredKeyID>85DDB95F-3992-6F7E-4F70-6EA7515B8257</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>ID_PROV</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

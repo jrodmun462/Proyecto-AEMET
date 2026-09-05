@@ -17,13 +17,11 @@ class OracleClient:
         """Establece la conexión física con el servidor Oracle."""
         try:
             if not self.conexion:
-                print("Intentando conectar a la base de datos Oracle...")
                 self.conexion = oracledb.connect(
                     user=self.user,
                     password=self.password,
                     dsn=self.dsn
                 )
-                print(f"¡Conexión establecida con éxito! (Versión: {self.conexion.version})")
             return self.conexion
         except oracledb.Error as e:
             print(f"❌ Error al conectar a Oracle: {e}")
@@ -84,6 +82,8 @@ class OracleClient:
             print(f"❌ Error en la inserción masiva: {e}")
             self.conexion.rollback()
             return False
+        finally:
+            self.close()
 
     def insertar_comunidades_masivo(self, lista_comunidades):
         """Carga masiva de comunidades autónomas en la tabla AUT_COMM."""
@@ -107,16 +107,16 @@ class OracleClient:
             print(f"❌ Error en la inserción masiva: {e}")
             self.conexion.rollback()
             return False
+        finally:
+            self.close()
 
-    def comprobar_provincia_existente(self, idProv):
+    def comprobar_provincia_existente(self, idProv, cursor):
         """Comprueba si hay algun municipio que tenga una provincia que no tenga código."""
         query = "SELECT COUNT(*) FROM PROVINCE WHERE ID_PROV= :idProv"
-        self.connect()
         try:
-            with self.conexion.cursor() as cursor:
-                cursor.execute(query, {"idProv": idProv})
-                count = cursor.fetchone()[0]
-                return count
+            cursor.execute(query, {"idProv": idProv})
+            count = cursor.fetchone()[0]
+            return count
         except oracledb.Error as e:
             print(f"❌ Error al comprobar provincia existente: {e}")
             return False
@@ -133,6 +133,8 @@ class OracleClient:
         except oracledb.Error as e:
             print(f"❌ Error al comprobar provincia existente: {e}")
             return False
+        finally:
+            self.close()
 
     def insertar_municipios_masivo(self, lista_municipios):
         """Carga masiva de municipios en la tabla MUNICIPALITIES."""
@@ -164,29 +166,58 @@ class OracleClient:
             print(f"❌ Error en la inserción masiva: {e}")
             self.conexion.rollback()
             return False
+        finally:
+            self.close()
 
     def insertar_centros_masivo(self, lista_centros):
         """Carga masiva de centros en la tabla CENTROS."""
         query = """
-            MERGE INTO METEOR_CENTER M
-                USING (SELECT :id_mun AS id_mun, :id_mun_aemet AS id_mun_aemet, :id_prov AS id_prov, :nam_mun AS nombre FROM DUAL) D
-                ON (M.ID_MUN_AEMET = D.id_mun_aemet AND M.ID_PROV = D.id_prov)
-            WHEN NOT MATCHED THEN
-                INSERT (ID_MUN, ID_MUN_AEMET, ID_PROV, NAM_MUN) VALUES (D.id_mun, D.id_mun_aemet, D.id_prov, D.nombre)
-        """
-        query2= "SELECT COUNT(*) FROM MUNICIPALITIES"
+    MERGE INTO METEOR_CENTER M
+    USING (SELECT :idCenter as ID_CENTER, 
+                  :idProv as ID_PROV, 
+                  :namCenter as NAM_CENTER, 
+                  :numLatitude as NUM_LATITUDE,
+                  :hemisphereLat as HEMISPHERE_LAT,
+                  :numLongitude as NUM_LONGITUDE,
+                  :hemisphereLongt as HEMISPHERE_LONGT,
+                  :numElevation as NUM_ELEVATION
+            FROM DUAL) D ON (D.ID_CENTER = M.ID_CENTER)
+    WHEN NOT MATCHED THEN
+        INSERT (
+            ID_CENTER, 
+            ID_PROV, 
+            NAM_CENTER, 
+            NUM_LATITUDE, 
+            HEMISPHERE_LAT, 
+            NUM_LONGITUDE, 
+            HEMISPHERE_LONGT, 
+            NUM_ELEVATION, 
+            DATE_OPRTN_INSERT
+        ) VALUES (
+            D.ID_CENTER, 
+            D.ID_PROV, 
+            D.NAM_CENTER, 
+            D.NUM_LATITUDE, 
+            D.HEMISPHERE_LAT, 
+            D.NUM_LONGITUDE, 
+            D.HEMISPHERE_LONGT, 
+            D.NUM_ELEVATION, 
+            SYSTIMESTAMP
+        )        """
+        query2= "SELECT COUNT(*) FROM METEOR_CENTER"
         self.connect()
         try:
             vacio = True
             with self.conexion.cursor() as cursor:
-                #Comprobamos si ya hay registros en la tabla MUNICIPALITIES
+                #Comprobamos si ya hay registros en la tabla METEOR_CENTER
                 cursor.execute(query2)
                 total_registros = cursor.fetchone()[0]
                 if total_registros > 0:
                     print(f"⚠️ Aviso: La tabla no esta vacia. Hay Registros que no han sido insertados para evitar duplicados.")
                     vacio = False
 
-                cursor.executemany(query, lista_municipios)
+                cursor.executemany(query, lista_centros)
+
                 self.conexion.commit()
                 if vacio == True:
                     print(f"✅ Registros insertados y confirmados (COMMIT).")
@@ -195,10 +226,44 @@ class OracleClient:
             print(f"❌ Error en la inserción masiva: {e}")
             self.conexion.rollback()
             return False
+        finally:
+            self.close()
+
+    def existeProvincia(self,  namProv, cursor):
+        """Busca una provincia por su nombre y devuelve su ID."""
+        query = "SELECT ID_PROV FROM PROVINCE WHERE NAM_PROV = :namProv"
+        try:
+            cursor.execute(query, {"namProv": namProv})
+            resultado = cursor.fetchone()
+            if resultado is None or resultado[0] == 0:
+                return None
+            else:
+                return resultado[0]
+        except oracledb.Error as e:
+            print(f"❌ Error al buscar provincia: {e}")
+            return None
+        finally:
+            self.close()
+
+    def buscarProvinciaParcial(self, namProv, cursor):
+            """Busca una provincia buscando por su nombre parcial."""
+            query = "SELECT ID_PROV FROM PROVINCE WHERE NAM_PROV LIKE :namProv"
+
+            try:
+                cursor.execute(query, {"namProv": f"%{namProv}%"})
+                resultado = cursor.fetchone()
+                if resultado is None or resultado[0] == 0:
+                    return None
+                else:
+                    return resultado[0]
+            except oracledb.Error as e:
+                print(f"❌ Error al buscar provincia: {e}")
+                return None    
+            finally:
+                self.close()
 
     def close(self):
         """Cierra la conexión de forma segura si está abierta."""
         if self.conexion:
             self.conexion.close()
             self.conexion = None
-            print("Conexión con Oracle cerrada correctamente.")

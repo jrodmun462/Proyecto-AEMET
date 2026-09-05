@@ -87,7 +87,7 @@
 <indexState>Primary Constraint</indexState>
 <isSurrogateKey>false</isSurrogateKey>
 <indexColumnUsage>
-<colUsage columnID="696D75F3-D8F0-9532-7737-B95C591B7DBA"/>
+<colUsage columnID="EC116198-51EB-7C97-4E5B-9BCB4EF8AAB6"/>
 </indexColumnUsage>
 </ind_PK_UK>
 <ind_PK_UK id="77B13FF3-091A-43CF-04B6-66A14E404CE7" name="MUNICIPALITIES_PK">

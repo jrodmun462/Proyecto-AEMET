@@ -46,7 +46,7 @@ class AemetClient:
     def getDataFrame(self, url_endpoint):
         """Realiza la petición y devuelve directamente un DataFrame de pandas."""
         datos = self._realizar_peticion(url_endpoint)
-
+        
         if datos is None:
             return pd.DataFrame()  # DataFrame vacío si algo falló
 
