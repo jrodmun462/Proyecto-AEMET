@@ -24,8 +24,9 @@ Todos los pipelines de carga en Oracle siguen el mismo patrón, con las tres fas
 |---|---|---|
 | `Pipelines/ETL_AUT_COMM` | JSON AEMET | ✅ Completado |
 | `Pipelines/ETL_PROVINCE` | Excel INE + JSON AEMET | ✅ Completado |
-| `Pipelines/ETL_MUNICIPALITIES` | API REST AEMET | 🚧 En progreso |
-| `Pipelines/ETL_METEOR_CENTER` | API REST AEMET | ⬜ Pdte |
+| `Pipelines/ETL_MUNICIPALITIES` | API REST AEMET | ✅ Completado|
+| `Pipelines/ETL_METEOR_CENTER` | API REST AEMET | 🚧 En progreso |
+| `Pipelines/ETL_TIME_REPORT` | ¿? | ¿? |
 
 ### Migración a Azure (Azure Data Factory)
 
@@ -72,7 +73,7 @@ y acelerar la escritura de código—, bajo dirección y revisión propias en ca
 - [x] Infraestructura de migración a Azure (Integration Runtime, Linked Services, Datasets)
 - [x] Pipeline de ADF: Oracle → Azure SQL para `AUT_COMM` y `PROVINCE`
 - [x] Control de versiones de ADF conectado a GitHub
-- [ ] ETL de municipios desde API de AEMET
+- [x] ETL de municipios desde API de AEMET
 - [ ] ETL de centros meteorológicos desde API de AEMET
 - [ ] Ingesta de datos de predicción/observación meteorológica
 - [ ] Extender el pipeline de ADF a las tablas restantes

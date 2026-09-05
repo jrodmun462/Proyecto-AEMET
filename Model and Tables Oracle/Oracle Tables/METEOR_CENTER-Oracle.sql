@@ -2,6 +2,8 @@ CREATE TABLE METEOR_CENTER
     ( 
      ID_CENTER         VARCHAR2 (5)  NOT NULL , 
      ID_PROV           NUMBER  NOT NULL , 
+     DATE_START        DATE , 
+     DATE_END          DATE , 
      NAM_CENTER        VARCHAR2 (100)  NOT NULL , 
      NUM_LATITUDE      NUMBER , 
      HEMISPHERE_LAT    VARCHAR2 (1)  NOT NULL , 

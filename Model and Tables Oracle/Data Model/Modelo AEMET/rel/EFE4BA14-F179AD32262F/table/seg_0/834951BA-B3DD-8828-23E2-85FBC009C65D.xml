@@ -37,6 +37,28 @@
 <colAssociation fkAssociation="65482619-8C81-DC2D-BEB5-CD75644463F0" referredColumn="98361F55-E646-E5B1-3CA3-D52CAA0E750E"/>
 </associations>
 </Column>
+<Column name="DATE_START" id="10096733-4BA3-ED75-5EE8-B348FB16F8D9">
+<createdBy>jonij</createdBy>
+<createdTime>2026-09-05 17:40:04 UTC</createdTime>
+<ownerDesignName>Modelo AEMET</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="DATE_END" id="34967AD5-4AFA-CB3C-DADF-1CE7D4238ADF">
+<createdBy>jonij</createdBy>
+<createdTime>2026-09-05 17:40:04 UTC</createdTime>
+<ownerDesignName>Modelo AEMET</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
 <Column name="NAM_CENTER" id="D4ED5A03-E7E5-ADA9-08BB-DC42DF9F6193">
 <createdBy>Usuario</createdBy>
 <createdTime>2026-07-31 17:37:20 UTC</createdTime>
