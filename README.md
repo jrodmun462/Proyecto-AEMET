@@ -25,7 +25,7 @@ Todos los pipelines de carga en Oracle siguen el mismo patrón, con las tres fas
 | `Pipelines/ETL_AUT_COMM` | JSON AEMET | ✅ Completado |
 | `Pipelines/ETL_PROVINCE` | Excel INE + JSON AEMET | ✅ Completado |
 | `Pipelines/ETL_MUNICIPALITIES` | API REST AEMET | ✅ Completado|
-| `Pipelines/ETL_METEOR_CENTER` | API REST AEMET | 🚧 En progreso |
+| `Pipelines/ETL_METEOR_CENTER` | API REST AEMET | ✅ Completado |
 | `Pipelines/ETL_TIME_REPORT` | ¿? | ¿? |
 
 ### Migración a Azure (Azure Data Factory)
